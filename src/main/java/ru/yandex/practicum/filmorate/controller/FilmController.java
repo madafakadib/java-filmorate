@@ -23,7 +23,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> getAllFilms () {
+    public Collection<Film> getAllFilms() {
         return films.values();
     }
 

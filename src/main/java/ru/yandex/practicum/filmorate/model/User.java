@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Slf4j
@@ -12,5 +12,5 @@ public class User {
     String email;
     String login;
     String name;
-    Instant date;
+    LocalDateTime date;
 }

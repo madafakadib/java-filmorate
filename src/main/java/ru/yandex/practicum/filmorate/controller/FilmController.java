@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class FilmController {
             throw new ValidateException("Дата релиза — не раньше 28 декабря 1895 года");
         }
 
-        if (!film.getDuration().isPositive()) {
+        if (film.getDuration() < 1) {
             log.warn("добавление не удалось - длительность не соответствует требованиям");
             throw new ValidateException("Продолжительность фильма должна быть положительным числом");
         }
@@ -81,7 +82,7 @@ public class FilmController {
                 throw new ValidateException("Дата релиза — не раньше 28 декабря 1895 года");
             }
 
-            if (!newFilm.getDuration().isPositive()) {
+            if (newFilm.getDuration() < 1) {
                 log.warn("не удалось обновить - длина фильма не соответствует требованиям");
                 throw new ValidateException("Продолжительность фильма должна быть положительным числом");
             }

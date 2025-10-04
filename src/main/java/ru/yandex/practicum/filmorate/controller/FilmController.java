@@ -19,13 +19,13 @@ public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
-    public Collection<Film> getFilms () {
+    public Collection<Film> getFilms() {
         log.info("Показ всех фильмов");
         return films.values();
     }
 
     @PostMapping
-    public Film addFilm (@RequestBody Film film) {
+    public Film addFilm(@RequestBody Film film) {
         log.info("добавление фильма");
         if (film.getName() == null || film.getName().isBlank()) {
             log.warn("добавление не удалось - название фильма не соответствует требованиям");
@@ -54,7 +54,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm (@RequestBody Film newFilm) {
+    public Film updateFilm(@RequestBody Film newFilm) {
 
         if (newFilm.getId() == null) {
             log.warn("id не может быть равен нулю");
@@ -108,5 +108,4 @@ public class FilmController {
                 .orElse(0);
         return ++currentMaxId;
     }
-
 }

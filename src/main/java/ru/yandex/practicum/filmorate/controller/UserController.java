@@ -52,7 +52,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser (@RequestBody User newUser) {
+    public User updateUser(@RequestBody User newUser) {
         log.info("начало обновления данных пользователя");
         if (newUser.getId() == null) {
             log.warn("id не может быть равен нулю");

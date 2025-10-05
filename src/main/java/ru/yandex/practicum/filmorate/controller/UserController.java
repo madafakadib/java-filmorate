@@ -80,6 +80,7 @@ public class UserController {
 
             oldUser.setEmail(newUser.getEmail());
             oldUser.setLogin(newUser.getLogin());
+            oldUser.setBirthday(newUser.getBirthday());
 
             if (newUser.getName() == null || newUser.getName().isBlank()) {
                 log.info("имя пользователя пусто потому будет присвоим вместо имени логин");

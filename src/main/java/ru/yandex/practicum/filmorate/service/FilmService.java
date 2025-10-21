@@ -37,6 +37,13 @@ public class FilmService {
     }
 
     public void likeFilm(Long filmId, Long userId) {
+        if (filmId == null) {
+            throw new NotFoundException("фильм не найден");
+        }
+
+        if (userId == null) {
+            throw new NotFoundException("пользователь не найден");
+        }
         Film film = getFilmById(filmId);
         film.getLikes().add(userId);
         filmStorage.updateFilm(film);

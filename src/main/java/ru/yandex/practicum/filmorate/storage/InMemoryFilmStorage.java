@@ -94,15 +94,15 @@ public class InMemoryFilmStorage implements FilmStorage {
             return oldFilm;
         }
         log.warn("фильм с id {} не найден", newFilm.getId());
-        throw new NotFoundException("Пользователь с id = " + newFilm.getId() + " не найден");
+        throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
     }
 
     @Override
-    public Optional<Film> getFilmById(Long userId) {
-        if (userId == null) {
-            throw new NotFoundException("Пользователь с id = " + userId + " не найден");
+    public Optional<Film> getFilmById(Long filmId) {
+        if (!films.containsKey(filmId)) {
+            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
         }
-        return Optional.ofNullable(films.get(userId));
+        return Optional.ofNullable(films.get(filmId));
     }
 
     private long getNextId() {

@@ -56,7 +56,11 @@ public class FilmService {
     }
 
     public void unlikeFilm(Long filmId, Long userId) {
+        Collection<User> users = userStorage.getUsers();
         Film film = getFilmById(filmId);
+        if (!users.contains(getUserById(userId))) {
+            throw new NotFoundException("пользователь не найден");
+        }
         film.getLikes().remove(userId);
         filmStorage.updateFilm(film);
     }

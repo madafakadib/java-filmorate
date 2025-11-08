@@ -1,74 +1,80 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class FilmService {
-
     private final FilmStorage filmStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
+    private final LikeStorage likeStorage;
     private final UserStorage userStorage;
 
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public Film create(Film film) {
+        return filmStorage.create(film);
     }
 
-    public Collection<Film> getFilms() {
-        return filmStorage.getFilms();
-    }
-
-    public Film addFilm(Film film) {
-        return filmStorage.addFilm(film);
-    }
-
-    public Film updateFilm(Film newFilm) {
-        return filmStorage.updateFilm(newFilm);
-    }
-
-    public Film getFilmById(Long filmId) {
-        return filmStorage.getFilmById(filmId)
-                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
-    }
-
-    public User getUserById(Long userId) {
-        return userStorage.getUserById(userId)
-                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
-    }
-
-    public void likeFilm(Long filmId, Long userId) {
-        Collection<User> users = userStorage.getUsers();
-        Film film = getFilmById(filmId);
-        if (!users.contains(getUserById(userId))) {
-            throw new NotFoundException("пользователь не найден");
+    public Film update(Film film) {
+        if (filmStorage.findFilmById(film.getId()).isEmpty()) {
+            throw new NotFoundException("Фильм не найден.");
         }
-        film.getLikes().add(userId);
-        filmStorage.updateFilm(film);
+        return filmStorage.update(film);
     }
 
-    public void unlikeFilm(Long filmId, Long userId) {
-        Collection<User> users = userStorage.getUsers();
-        Film film = getFilmById(filmId);
-        if (!users.contains(getUserById(userId))) {
-            throw new NotFoundException("пользователь не найден");
+    public List<Film> findAllFilms() {
+        List<Film> films = filmStorage.findAllFilms();
+        genreStorage.findAllGenresByFilm(films);
+        return films;
+    }
+
+    public Film findFilmById(int id) {
+        Film film = filmStorage.findFilmById(id).orElseThrow(() -> new NotFoundException("Фильм не найден."));
+        genreStorage.findAllGenresByFilm(List.of(film));
+        return film;
+    }
+
+    public void addLike(int id, int userId) {
+        if (userStorage.findUserById(id).isEmpty() || userStorage.findUserById(userId).isEmpty()) {
+            throw new NotFoundException("Пользователь не найден.");
         }
-        film.getLikes().remove(userId);
-        filmStorage.updateFilm(film);
+        likeStorage.addLike(id, userId);
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.getFilms().stream()
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+    public void removeLike(int id, int userId) {
+        if (userStorage.findUserById(id).isEmpty() || userStorage.findUserById(userId).isEmpty()) {
+            throw new NotFoundException("Пользователь не найден.");
+        }
+        likeStorage.removeLike(id, userId);
+    }
+
+    public List<Film> findPopular(int count) {
+        List<Film> films = filmStorage.findPopular(count);
+        genreStorage.findAllGenresByFilm(films);
+        return films;
+    }
+
+    public List<Mpa> findAllMpa() {
+        return mpaStorage.findAllMpa();
+    }
+
+    public Mpa findMpaById(int id) {
+        return mpaStorage.findMpaById(id).orElseThrow(() -> new NotFoundException("Рейтинг MPA не найден."));
+    }
+
+    public List<Genre> findAllGenres() {
+        return genreStorage.findAllGenres();
+    }
+
+    public Genre findGenreById(int id) {
+        return genreStorage.findGenreById(id).orElseThrow(() -> new NotFoundException("Жанр не найден."));
     }
 }

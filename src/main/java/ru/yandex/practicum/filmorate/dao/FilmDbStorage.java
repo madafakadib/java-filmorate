@@ -27,8 +27,6 @@ import java.util.Set;
 @Repository
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final GenreDbStorage genreDbStorage;
-    private final MpaDbStorage mpaDbStorage;
 
     private static final String SELECT_FILMS = "SELECT f.film_id, f.name, f.description, f.releaseDate, f.duration, " +
             "mpa.rating_id, mpa.name AS mpa_name " +
@@ -38,34 +36,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film create(Film film) {
-        if (film.getName() == null || film.getName().isBlank()) {
-            throw new ValidateException("Название фильма не может быть пустым");
-        }
-
-        if (film.getDescription().length() > 200) {
-            throw new ValidateException("Максимальная длина описания — 200 символов");
-        }
-
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidateException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-
-        if (film.getDuration() < 1) {
-            throw new ValidateException("Продолжительность фильма должна быть положительным числом");
-        }
-
-        int mpaid = film.getMpa().getId();
-        Optional<Mpa> existingMpa = mpaDbStorage.findMpaById(mpaid);
-        if (existingMpa.isEmpty()) {
-            throw new NotFoundException("Рейтинг с id " + mpaid + " не найден");
-        }
-
-        for (Genre genre : film.getGenres()) {
-            Optional<Genre> existingGenre = genreDbStorage.findGenreById(genre.getId());
-            if (existingGenre.isEmpty()) {
-                throw new NotFoundException("Жанр с id " + genre.getId() + " не найден");
-            }
-        }
 
         String sql = "INSERT INTO films (name, description, releaseDate, duration, rating_id) VALUES (?, ?, ?, ?, ?)";
 
@@ -87,9 +57,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidateException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
         int id = film.getId();
         String sql = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, rating_id = ? " +
                 "WHERE film_id = ?";

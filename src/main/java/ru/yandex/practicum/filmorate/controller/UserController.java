@@ -34,9 +34,8 @@ public class UserController {
         return userService.create(user);
     }
 
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable("id") int id, @RequestBody User user) {
-        user.setId(id);
+    @PutMapping()
+    public User updateUser(@RequestBody User user) {
         return userService.update(user);
     }
 
@@ -58,5 +57,10 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> findCommonFriends(@PathVariable("id") int id, @PathVariable("otherId") int otherId) {
         return userService.findCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public User getFriend(@PathVariable int id) {
+        return userService.findFriendsByUserId(id);
     }
 }

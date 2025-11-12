@@ -6,19 +6,19 @@ import org.springframework.web.bind.annotation.*;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler()
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
         return new ErrorResponse("Не найдено");
     }
 
-    @ExceptionHandler()
+    @ExceptionHandler(ValidateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidateException(ValidateException e) {
         return new ErrorResponse("Нарушена валидация запроса");
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(InternalServerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(Exception e) {
         return new ErrorResponse("На сервере произошла непредвиденная внутренняя ошибка," +

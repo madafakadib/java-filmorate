@@ -1,0 +1,68 @@
+package ru.yandex.practicum.filmorate.dao;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendStorage;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+@Repository
+@RequiredArgsConstructor
+public class FriendDbStorage implements FriendStorage {
+    private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public void addFriend(int id, int friendId) {
+        String sql = "INSERT INTO friendship(user_id, friend_id) VALUES (?,?)";
+        jdbcTemplate.update(sql, id, friendId);
+    }
+
+    @Override
+    public void removeFriend(int userId, int friendId) {
+        String sql = "DELETE FROM friendship WHERE USER_ID = ? AND FRIEND_ID = ?";
+        jdbcTemplate.update(sql, userId, friendId);
+    }
+
+    @Override
+    public List<User> findAllFriends(int id) {
+        String sql = "SELECT u.user_id, u.email, u.login, u.name, u.birthday " +
+                "FROM friendship AS f " +
+                "INNER JOIN users AS u ON u.user_id = f.friend_id " +
+                "WHERE f.user_id = ? " +
+                "ORDER BY u.user_id";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFriend(rs), id);
+    }
+
+    @Override
+    public List<User> findCommonFriends(int id, int otherId) {
+        String sql = "SELECT u.user_id, u.email, u.login, u.name, u.birthday " +
+                "FROM friendship AS f " +
+                "INNER JOIN friendship fr ON fr.friend_id = f.friend_id " +
+                "INNER JOIN users u ON u.user_id = fr.friend_id " +
+                "WHERE f.user_id = ? AND fr.user_id = ? " +
+                "AND f.friend_id <> fr.user_id AND fr.friend_id <> f.user_id";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFriend(rs), id, otherId);
+    }
+
+    public User findFriendsByUserId(int id) {
+        String sql = "SELECT u.* FROM users u " +
+                "JOIN friendship f ON u.id = f.friend_id " +
+                "WHERE f.user_id = ?";
+
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFriend(rs), id);
+    }
+
+    private User makeFriend(ResultSet rs) throws SQLException {
+        return User.builder()
+                .id(rs.getInt("user_id"))
+                .email(rs.getString("email"))
+                .login(rs.getString("login"))
+                .name(rs.getString("name"))
+                .birthday(rs.getDate("birthday").toLocalDate())
+                .build();
+    }
+}
